@@ -273,12 +273,17 @@ export const getUserLocation = async (req, res) => {
   }
 };
 
-// Schema
 
+import moment from 'moment';
 
-// Controllers
 export const saveOrder = async (req, res) => {
   try {
+    // Time restriction: block orders after 10 PM
+    /*const currentHour = moment().hour();
+    if (currentHour >=22 || currentHour < 6) { // Block between 10 PM and 6 AM
+      return res.status(403).json({ error: 'Orders are not accepted after 10 PM. Please try again tomorrow.' });
+    }*/
+
     const { cartItems, totalPrice: subTotal, locationAddress } = req.body;
     const userId = req.user._id;
 
@@ -338,6 +343,7 @@ export const saveOrder = async (req, res) => {
   }
 };
 
+
 export const getDetails = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -372,15 +378,28 @@ export const updatePaymentStatus = async (req, res) => {
     const { paymentStatus, paymentMethod } = req.body;
     const userId = req.user._id;
 
-    const order = await OrderDetails.findOne({ _id: orderId, userId });
+    // Find the order based on orderId and userId
+    const order = await OrderDetails.findOne({ _id: orderId, userId }).populate('cartItems.productId');
 
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
 
+    // Update the payment status
     order.paymentStatus = paymentStatus;
     order.paymentMethod = paymentMethod;
     order.paymentUpdatedAt = new Date();
+
+    // If payment is successful, update product stock
+    if (paymentStatus === "SUCCESS") {
+      for (const item of order.cartItems) {
+        const product = await Product.findById(item.productId);
+        if (product) {
+          product.quantity -= item.quantity;
+          await product.save();
+        }
+      }
+    }
 
     await order.save();
 
@@ -391,5 +410,33 @@ export const updatePaymentStatus = async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Failed to update payment status' });
+  }
+};
+
+
+export const getDetailsAll = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'User not found' });
+    }
+
+    // Fetch all orders for the user, sorted by creation date
+    const allOrders = await OrderDetails.find({ userId })
+      .populate('cartItems.productId', 'name price image ')
+      .sort({ createdAt: -1 });
+
+    if (!allOrders || allOrders.length === 0) {
+      return res.status(404).json({ error: 'No orders found' });
+    }
+
+    return res.status(200).json({
+      message: 'Orders retrieved successfully',
+      orders: allOrders
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Failed to fetch orders' });
   }
 };

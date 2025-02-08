@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Search, MapPin } from "lucide-react";
 import ItemCardConsumer from "../components/ItemCardConsumer";
-import HeroSection from "./HeroSection";
-import { Footer } from "./Footer";
 import HeroSectionConsumer from "./HeroSectionConsumer";
+import NewFooter from "./Footer";
 
 const Consumer = () => {
   const [products, setProducts] = useState([]);
@@ -19,6 +18,21 @@ const Consumer = () => {
   const [debounceTimeout, setDebounceTimeout] = useState(null);
 
   const AVAILABLE_CITIES = ["Kolhapur", "Pune", "Mumbai"];
+
+  // Load previously selected city from localStorage
+  useEffect(() => {
+    const savedCity = localStorage.getItem("selectedCity");
+    if (savedCity) {
+      setSelectedCity(savedCity);
+    }
+  }, []);
+
+  // Save selected city to localStorage when user changes it
+  const handleCityChange = (e) => {
+    const city = e.target.value;
+    setSelectedCity(city);
+    localStorage.setItem("selectedCity", city);
+  };
 
   // Fetch all products from the backend
   const fetchProducts = async () => {
@@ -39,6 +53,11 @@ const Consumer = () => {
     }
   };
 
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  // Search functionality with debounce
   const handleSearchChange = (e) => {
     const queryText = e.target.value;
     setQuery(queryText);
@@ -66,7 +85,7 @@ const Consumer = () => {
     }
   };
 
-  // Filter by category and discount
+  // Filtering functions
   const getFilteredProducts = () => {
     let filteredProducts = [...products];
 
@@ -107,7 +126,6 @@ const Consumer = () => {
     }
     return filteredProducts;
   };
-
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -129,7 +147,7 @@ const Consumer = () => {
           <div>
             <select
               value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
+              onChange={handleCityChange}
               className="px-4 py-3 border border-[#1dcc75]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1dcc75] bg-white/90 w-full md:w-48 hover:border-[#1dcc75] transition-colors"
             >
               <option value="">Select City</option>
@@ -156,7 +174,7 @@ const Consumer = () => {
           </div>
         )}
 
-        {/* Only show filters and products if a city is selected */}
+        {/* Filters and Products Section */}
         {selectedCity && (
           <>
             {/* Filter & Search Section */}
@@ -211,28 +229,20 @@ const Consumer = () => {
             </div>
             </div>
 
-            {/* Products Grid */}
-            {loading ? (
-              <div className="flex justify-center items-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#1dcc75]"></div>
-              </div>
-            ) : error ? (
-              <div className="text-red-500 bg-red-50 p-4 rounded-lg border border-red-200 text-center">{error}</div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-                {sortedProducts.length > 0 ? (
-                  sortedProducts.map((product) => (
-                    <ItemCardConsumer key={product._id} product={product} />
-                  ))
-                ) : (
-                  <p className="text-gray-600 text-center col-span-full">No products found in {selectedCity}.</p>
-                )}
-              </div>
-            )}
+            {/* Product Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+              {sortedProducts.length > 0 ? (
+                sortedProducts.map((product) => (
+                  <ItemCardConsumer key={product._id} product={product} />
+                ))
+              ) : (
+                <p className="text-gray-600 text-center col-span-full">No products found in {selectedCity}.</p>
+              )}
+            </div>
           </>
         )}
       </div>
-      <Footer />
+      <NewFooter />
     </div>
   );
 };

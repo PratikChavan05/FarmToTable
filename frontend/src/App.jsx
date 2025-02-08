@@ -12,7 +12,8 @@ import MyListings from "./pages/MyListings";
 import AddProduct from "./pages/AddProduct";
 import Navbar from "./pages/Navbar";
 import FarmerNavbar from "./pages/FarmerNavbar";
-import ConsumerNavbar from "./pages/ConsumerNavbar"; // Import ConsumerNavbar
+import ConsumerNavbar from "./pages/ConsumerNavbar"; 
+import FarmToTableChat from "./components/chat";
 import Consumer from "./pages/Consumer";
 import CartPage from "./pages/CartPage";
 import OrderPage from "./pages/OrderPage";
@@ -25,9 +26,15 @@ import Model from './pages/Model'
 import OrderDetails from "./pages/OrderDetails";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminLogin from "./pages/AdminLogin";
+import UserOrdersPage from "./components/RouteMap";
+import OrderList from "./components/RouteMap";
+
+import Delivery from "./pages/Delivery";
+import DeliveryNavbar from "./components/Delivery-Navbar";
+import FarmerOrders from "./pages/FarmerOrders";
 
 const App = () => {
-  const { user, loading, isAuth,fetchUser } = UserData();
+  const { user, loading, isAuth } = UserData();
 
   if (loading) {
     return <Loading />;
@@ -41,12 +48,12 @@ const App = () => {
 };
 
 const AppWithLocation = ({ user, isAuth }) => {
-  const location = useLocation(); // Hook is now inside BrowserRouter context
+  const location = useLocation();
 
   // Determine which navbar to display
   const showFarmerNavbar = isAuth && user.role === "farmer";
   const showConsumerNavbar = isAuth && user.role === "customer";
-  
+  const showDeliveryNavbar = isAuth && user.role === "delivery boy";
 
   return (
     <>
@@ -55,17 +62,21 @@ const AppWithLocation = ({ user, isAuth }) => {
         <FarmerNavbar />
       ) : showConsumerNavbar ? (
         <ConsumerNavbar />
+      ) : showDeliveryNavbar ? (
+        <DeliveryNavbar />
       ) : (
         <Empty />
       )}
 
       <Routes>
-      <Route
+        <Route
           path="/"
           element={
             isAuth ? (
               user.role === "farmer" ? (
                 <Navigate to="/farmer" />
+              ) : user.role === "delivery boy" ? (
+                <Navigate to="/delivery" />
               ) : (
                 <Navigate to="/consumer" />
               )
@@ -80,6 +91,8 @@ const AppWithLocation = ({ user, isAuth }) => {
             isAuth ? (
               user.role === "farmer" ? (
                 <Navigate to="/farmer" />
+              ) : user.role === "delivery boy" ? (
+                <Navigate to="/delivery" />
               ) : (
                 <Navigate to="/consumer" />
               )
@@ -88,71 +101,40 @@ const AppWithLocation = ({ user, isAuth }) => {
             )
           }
         />
-
         <Route
           path="/farmer"
-          element={
-            isAuth && user.role === "farmer" ? (
-              <FarmerHome />
-            ) : (
-              <Navigate to="/" />
-            )
-          }
+          element={isAuth && user.role === "farmer" ? <FarmerHome /> : <Navigate to="/" />}
         />
         <Route
           path="/consumer"
-          element={
-            isAuth && user.role === "customer" ? (
-              <Consumer />
-            ) : (
-              <Navigate to="/" />
-            )
-          }
+          element={isAuth && user.role === "customer" ? <Consumer /> : <Navigate to="/" />}
         />
         <Route
-          path="/register"
-          element={
-            isAuth ? (
-              user.role === "farmer" ? (
-                <Navigate to="/farmer" />
-              ) : (
-                <Navigate to="/consumer" />
-              )
-            ) : (
-              <Register />
-            )
-          }
+          path="/delivery"
+          element={isAuth && user.role === "delivery boy" ? <Delivery /> : <Navigate to="/" />}
         />
-        
+        <Route path="/register" element={<Register />} />
         <Route path="/verify/:token" element={<Verify />} />
-        <Route
-          path="/forgot"
-          element={
-            isAuth ? (
-              user.role === "farmer" ? (
-                <Navigate to="/farmer" />
-              ) : (
-                <Navigate to="/consumer" />
-              )
-            ) : (
-              <Forgot />
-            )
-          }
-        />
+        <Route path="/forgot" element={<Forgot />} />
         <Route path="/reset-password/:token" element={<Reset />} />
-        
-        <Route path="/mylistings" element={isAuth && user.role==="farmer"? <MyListings user={user} />:<Home/>} />
-        <Route path="/addproduct" element={isAuth && user.role==="farmer"? <AddProduct />:<Home/>} />
-        <Route path="/cart" element={isAuth && user.role==="customer"? <CartPage/>:<Home/>}/>
-        <Route path="/past-orders" element={isAuth && user.role==="customer"? <OrderPage/>:<Home/>}/>
-        <Route path="/order" element={<OrderDetails/>}/>
-        <Route path="/routemap" element={<AddToCart/>}/>
-        <Route path="/model" element={<Model/>}/>
+        <Route path="/mylistings" element={isAuth && user.role === "farmer" ? <MyListings user={user} /> : <Home />} />
+        <Route path="/addproduct" element={isAuth && user.role === "farmer" ? <AddProduct /> : <Home />} />
+        <Route path="/cart" element={isAuth && user.role === "customer" ? <CartPage /> : <Home />} />
+        <Route path="/past-orders" element={isAuth && user.role === "customer" ? <OrderPage /> : <Home />} />
+        <Route path="/order" element={isAuth && user.role === "customer" ? <OrderDetails /> : <Home />} />
+        <Route path="/orders" element={isAuth && user.role === "customer" ? <OrderList /> : <Home />} />
+        <Route  path="/model" element={isAuth && user.role === "farmer" ? <Model /> : <Home />} />
+        <Route path="admin-login" element={isAuth && user.role === "admin" ? <AdminLogin /> : <Home />} />
+        <Route path="verify-farmer" element={isAuth && user.role === "admin" ? <AdminDashboard /> : <Home />} />
+        <Route path="/farmerorder" element={isAuth && user.role === "farmer" ? <FarmerOrders /> : <Home />} />  
+        <Route path="/order" element={<OrderDetails />} />
+        <Route path="/orders" element={<OrderList />} />
+        <Route path="/model" element={<Model />} />
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/verify-farmer" element={<AdminDashboard />} />
-       
+        <Route path="/farmerorder" element={<FarmerOrders />} />
+        <Route path="/chat" element={<FarmToTableChat />} />
       </Routes>
-      
     </>
   );
 };

@@ -21,6 +21,7 @@ const schema = new mongoose.Schema(
         price: {
           type: Number,
           required: true
+          
         }
       }
     ],
@@ -45,6 +46,11 @@ const schema = new mongoose.Schema(
         type: [Number],  // [longitude, latitude]
         required: true
       }
+    },
+    deliveryStatus: {
+      type: String,
+      enum: ['PROCESSING', 'SHIPPED', 'OUT_FOR_DELIVERY', 'DELIVERED', 'CANCELLED'],
+      default: 'PROCESSING'
     },
     paymentStatus: {
       type: String,
