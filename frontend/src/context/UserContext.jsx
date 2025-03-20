@@ -11,6 +11,7 @@ export const UserProvider = ({ children }) => {
     const [admin, setAdmin] = useState([]);
     const [isAuthAdmin, setIsAuthAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [token, setToken] = useState("")
 
     async function loginUser(email, password, role, navigate) {
         setBtnLoading(true);
@@ -20,7 +21,12 @@ export const UserProvider = ({ children }) => {
             setUser(data.user);
             setIsAuth(true);
             setBtnLoading(false);
+            if(role === "delivery boy"){
+                setToken(data.token);
+                navigate("/delivery/"+token);
+                }else{
             navigate(`/${role}`);
+                };
         } catch (error) {
             toast.error(error.response?.data?.message || "Login failed");
             setBtnLoading(false);
@@ -151,6 +157,7 @@ export const UserProvider = ({ children }) => {
                 resetUser,
                 setAdmin,
                 isAuthAdmin,
+                token,
             }}
         >
             {children}

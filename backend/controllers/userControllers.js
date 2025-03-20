@@ -194,6 +194,17 @@ export const loginUser=TryCatch(async(req,res)=>{
     if (user.role === "delivery boy" && !user.isVerifiedByAdmin) {
       return res.status(403).json({ message: "Account not verified by admin" });
     }
+
+    if(user.role==="delivery boy" && user.isVerifiedByAdmin){
+      generateToken(user,res);
+      const token = jwt.sign({ email }, process.env.JWT_SEC, { expiresIn: "5m" });
+
+      return res.status(200).json({
+        user,
+        token,
+      message:"Logged In",});
+        
+    }
     generateToken(user,res);
 
 

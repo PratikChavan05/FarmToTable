@@ -29,7 +29,7 @@ import AdminLogin from "./pages/AdminLogin";
 import UserOrdersPage from "./components/RouteMap";
 import OrderList from "./components/RouteMap";
 
-import Delivery from "./pages/Delivery";
+import Delivery from "./pages/Deliveryboy";
 import DeliveryNavbar from "./components/Delivery-Navbar";
 import FarmerOrders from "./pages/FarmerOrders";
 
@@ -48,9 +48,12 @@ import AdminNavbarNew from "./pages/AdminNavbarNew";
 import LandingPage from "./pages/try";
 import ThreeDLandingPage from "./pages/try";
 import Predict from "./pages/Predict";
+import Deliveryboy from "./pages/Deliveryboy";
 
 const App = () => {
-  const { user, loading, isAuth,isAuthAdmin } = UserData();
+  const { user, loading, isAuth,isAuthAdmin ,token} = UserData();
+  
+  
   console.log(isAuthAdmin);
   if (loading) {
     return <Loading />;
@@ -58,12 +61,12 @@ const App = () => {
 
   return (
     <BrowserRouter>
-      <AppWithLocation user={user} isAuth={isAuth} isAuthAdmin={isAuthAdmin} />
+      <AppWithLocation user={user} isAuth={isAuth} isAuthAdmin={isAuthAdmin} token={token} />
     </BrowserRouter>
   );
 };
 
-const AppWithLocation = ({ user, isAuth ,isAuthAdmin}) => {
+const AppWithLocation = ({ user, isAuth ,isAuthAdmin,token}) => {
   const location = useLocation();
 
   // Determine which navbar to display
@@ -95,7 +98,7 @@ const AppWithLocation = ({ user, isAuth ,isAuthAdmin}) => {
               user.role === "farmer" ? (
                 <Navigate to="/farmer" />
               ) : user.role === "delivery boy" ? (
-                <Navigate to="/delivery" />
+                <Navigate to={`/delivery/${token}`} />
               ) : (
                 <Navigate to="/consumer" />
               )
@@ -111,7 +114,7 @@ const AppWithLocation = ({ user, isAuth ,isAuthAdmin}) => {
               user.role === "farmer" ? (
                 <Navigate to="/farmer" />
               ) : user.role === "delivery boy" ? (
-                <Navigate to="/delivery" />
+                <Navigate to={`/delivery/${token}`} />
               ) : (
                 <Navigate to="/consumer" />
               )
@@ -127,7 +130,7 @@ const AppWithLocation = ({ user, isAuth ,isAuthAdmin}) => {
               user.role === "farmer" ? (
                 <Navigate to="/farmer" />
               ) : user.role === "delivery boy" ? (
-                <Navigate to="/delivery" />
+                <Navigate to={`/delivery/${token}`} />
               ) : (
                 <Navigate to="/consumer" />
               )
@@ -145,8 +148,8 @@ const AppWithLocation = ({ user, isAuth ,isAuthAdmin}) => {
           element={isAuth && user.role === "customer" ? <Consumer /> : <Navigate to="/" />}
         />
         <Route
-          path="/delivery"
-          element={isAuth && user.role === "delivery boy" ? <Delivery /> : <Navigate to="/" />}
+          path="/delivery/:token"
+          element={isAuth && user.role === "delivery boy" ? <Deliveryboy /> : <Navigate to="/" />}
         />
         
         <Route path="/verify/:token" element={<Verify />} />
@@ -159,8 +162,8 @@ const AppWithLocation = ({ user, isAuth ,isAuthAdmin}) => {
         <Route path="/order" element={isAuth && user.role === "customer" ? <OrderDetails /> : <Home />} />
         <Route path="/orders" element={isAuth && user.role === "customer" ? <OrderList /> : <Home />} />
         <Route  path="/model" element={isAuth && user.role === "farmer" ? <Model /> : <Home />} />
-        <Route path="admin-login" element={isAuth && user.role === "admin" ? <AdminLogin /> : <Home />} />
-        <Route path="verify-farmer" element={isAuth && user.role === "admin" ? <AdminDashboard /> : <Home />} />
+        <Route path="/admin-login" element={isAuth && user.role === "admin" ? <AdminLogin /> : <Home />} />
+        <Route path="/verify-farmer" element={isAuth && user.role === "admin" ? <AdminDashboard /> : <Home />} />
         <Route path="/farmerorder" element={isAuth && user.role === "farmer" ? <FarmerOrders /> : <Home />} />  
         <Route path="/learnFarmer" element={isAuth && user.role === "farmer" ? <FarmerLearnMore /> : <Home />} />  
         <Route path="/learnConsumer" element={isAuth && user.role === "customer" ? <ConsumerLearnMore /> : <Home />} />  
@@ -180,6 +183,7 @@ const AppWithLocation = ({ user, isAuth ,isAuthAdmin}) => {
         <Route path="/model2" element={<VegetableDemandPredictor/>} />
         <Route path="/predict" element={<Predict/>} />
         <Route path="/try" element={<ThreeDLandingPage/>} />
+        {/* <Route path="/temp" element={<Deliveryboy/>} /> */}
         
 
       </Routes>
